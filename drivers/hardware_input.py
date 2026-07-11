@@ -23,7 +23,7 @@ def get_hardware_choice(max_options, prompt_text):
     ser.reset_input_buffer()
     
     last_cycle_time = 0
-    CYCLE_COOLDOWN = 0.25  
+    CYCLE_COOLDOWN = 0.6 
     selection_counter = 0 
     
     while True:
