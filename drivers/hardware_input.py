@@ -15,54 +15,24 @@ def get_hardware_choice(max_options, prompt_text):
         return input("Enter choice manually: ")
         
     current_option = 1
-    print(f"-> Current Selection: [{current_option}] (Wave hand to cycle, hold close to select)")
     
+    # Clean the line completely before reading
+    ser.reset_input_buffer()
+    time.sleep(0.2)
     ser.reset_input_buffer()
     
-    last_cycle_time = 0
-    CYCLE_COOLDOWN = 0.6  # Half a second buffer between option jumps
+    print("\n--- DIAGNOSTIC MODE: Move your hand away from the sensor ---")
     
-    while True:
+    samples = 0
+    while samples < 15:
         if ser.in_waiting > 0:
             try:
                 line = ser.readline().decode('utf-8').strip()
-                if line.startswith("DIST:"):
-                    distance = float(line.split(":")[1])
-                    current_time = time.time()
-                    
-                    # 1. Selection Logic
-                    if 2.0 <= distance <= 12.0:
-                        print(f"\n[Confirmed] Selected Option: {current_option}\n")
-                        
-                        # --- THE FIX FOR GHOST SELECTING ---
-                        # Force a pause loop right here until you physically move your hand away
-                        print("Clear your hand away to continue...", end="\r")
-                        consecutive_clears = 0
-                        while consecutive_clears < 5:
-                            if ser.in_waiting > 0:
-                                clear_line = ser.readline().decode('utf-8').strip()
-                                if clear_line.startswith("DIST:"):
-                                    try:
-                                        clear_dist = float(clear_line.split(":")[1])
-                                        if clear_dist > 15.0 or clear_dist < 1.0: # 1.0 handles any dropped frames
-                                            consecutive_clears += 1
-                                        else:
-                                            consecutive_clears = 0 # reset if hand is still there
-                                    except ValueError:
-                                        pass
-                            time.sleep(0.01)
-                        
-                        ser.reset_input_buffer() # flush any backlogged frames
-                        return str(current_option)
-                        
-                    # 2. Cycling Logic (Uses non-blocking cooldown)
-                    elif 15.0 < distance <= 30.0:
-                        if current_time - last_cycle_time > CYCLE_COOLDOWN:
-                            current_option = (current_option % max_options) + 1
-                            print(f"-> Current Selection: [{current_option}]     ", end="\r")
-                            last_cycle_time = current_time
-                            ser.reset_input_buffer() # Clear backlog so it registers real-time position
-                            
-            except (ValueError, IndexError):
-                pass
+                print(f"Raw Hardware Output: {line}")
+                samples += 1
+            except Exception as e:
+                print(f"Error reading line: {e}")
         time.sleep(0.01)
+        
+    print("----------------------------------------------------------\n")
+    return input("Type anything here to close diagnostics: ")
