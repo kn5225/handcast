@@ -16,12 +16,15 @@ def get_hardware_choice(max_options, prompt_text):
         
     current_option = 1
     print(f"-> Current Selection: [{current_option}] (Wave hand to cycle, hold close to select)")
-    
+    time.sleep(0.05)            
+    ser.reset_input_buffer()    
+    if ser.in_waiting > 0:
+        ser.readline()          
     ser.reset_input_buffer()
     
     last_cycle_time = 0
-    CYCLE_COOLDOWN = 0.25  # --- SPEEDED UP: Fast, responsive menu scrolling
-    selection_counter = 0  # Tracks consecutive close readings to confirm intent
+    CYCLE_COOLDOWN = 0.25  
+    selection_counter = 0 
     
     while True:
         if ser.in_waiting > 0:
