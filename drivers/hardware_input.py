@@ -2,7 +2,7 @@ import serial
 import time
 
 try:
-    ser = serial.Serial('COM3', 115200, timeout=0.1)
+    ser = serial.Serial('COM5', 115200, timeout=0.1)
     time.sleep(2) 
 except Exception:
     ser = None
