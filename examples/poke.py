@@ -9,16 +9,19 @@ from drivers.hardware_input import get_hardware_choice
 pokemon_types=["Normal" , "Fire" , "Water" ,  "Electric" , "Grass" , "Ice" , "Fighting" , "Poison" , "Ground" , "Flying" ,
        "Psychic" , "Bug" , "Rock" , "Ghost" , "Dragon" , "Dark" , "Steel" , "Fairy"]
 pokemon_list=["Rattata" , "Charmander" , "Squirtle" , "Pikachu" , "Bulbasaur" , "Snover" , "Hitmonlee" , "Muk" , "Dugtrio" , 
-             "Pidgey" , "Psyduck" , "Butterfree" , "Geodude" , "Gastly" , "Sableye" , "Gibble" , "Aron" , "Clefairy"]                           
+             "Pidgey" , "Psyduck" , "Butterfree" , "Geodude" , "Gastly" , "Sableye" , "Gibble" , "Aron" , "Clefairy"]                            
 pokemon_moves = ["Tackle" , "Ember" , "Bubble" , "Thunder Shock" ,"Vine Whip" , "Icy Wind" , "Rolling Kick" , "Toxin" ,
          "Earthquake" , "Aerial Ace" , "Psybeam" ,"Bug Bite" , "Rock Smash" , "Shadow Claw" ,"Night Slash" , "Dragon Claw" ,
          "Metal Claw" , "Fairy Wind"]   
+
+# --- RESTORED ORIGINAL RANDOM HP GENERATION ---
+ph = ph1 = r.randrange(100, 200, 10)
 
 class Pokemon:
     def __init__(self, type_index):
         self.name=pokemon_list[type_index]
         self.type_name=pokemon_types[type_index]
-        self.HP=150
+        self.HP=ph1
         self.type_index=type_index
     def change_hp(self, d):
         self.HP+=d
@@ -71,10 +74,23 @@ while (t<20 and Pokemon2.HP>0) or (t<10 and Pokemon1.HP>0):
         elif event=="2":
             item = get_hardware_choice(2, "Which item would you like to use? \n 1: Potion \n 2: Full Restore")
             if item=="1":
-                Pokemon1.change_hp(10)
-                print("The Potion healed 10 HP")
+                if Pokemon1.HP < ph - 10:
+                    Pokemon1.change_hp(10)
+                    print("The Potion healed 10 HP")
+                elif Pokemon1.HP == ph:
+                    print("This item cannot be used")
+                    Wrongchoice=1
+                else:
+                    healed_amount = ph - Pokemon1.HP
+                    Pokemon1.HP = ph
+                    print(f"The Potion healed {healed_amount} HP")
             elif item=="2": 
-                print("The Full Restore healed to full HP")
+                if Pokemon1.HP == ph:
+                    print("This item cannot be used")
+                    Wrongchoice=1
+                else:
+                    Pokemon1.HP = ph
+                    print(f"The Full Restore healed {Pokemon1.name} to full HP")
             else:
                 Wrongchoice=1
         elif event=="3":
