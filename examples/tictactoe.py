@@ -20,21 +20,36 @@ def ticboard():
     print (ticlist[6],ticlist[7],ticlist[8],sep=" | ")
     print("\n")
 
-while turns < 10:
+while turns < 5:  # Changed to 5 because each iteration processes a turn pair
     ticboard()
     
-    move = int(get_hardware_choice(9, "Player 1 (X): Select grid position (1-9)"))
-    ticlist[move-1]='X'
+    # --- PLAYER 1 TURN WITH VALIDATION ---
+    while True:
+        move = int(get_hardware_choice(9, "Player 1 (X): Select grid position (1-9)"))
+        if ticlist[move-1] == " ":
+            ticlist[move-1] = 'X'
+            break
+        else:
+            print("That space is already occupied! Try again.")
+            time.sleep(1)
+            
     ticboard()
     
     for i in tuplist:
         if ticlist[i[0]]==ticlist[i[1]]==ticlist[i[2]]!=" ":
             play1win=1
-    if play1win==1 or turns==4:
+    if play1win==1 or turns==4: # If turns == 4 on Player 1's 5th move, board is full
         break
         
-    move = int(get_hardware_choice(9, "Player 2 (O): Select grid position (1-9)"))
-    ticlist[move-1]='O'
+    # --- PLAYER 2 TURN WITH VALIDATION ---
+    while True:
+        move = int(get_hardware_choice(9, "Player 2 (O): Select grid position (1-9)"))
+        if ticlist[move-1] == " ":
+            ticlist[move-1] = 'O'
+            break
+        else:
+            print("That space is already occupied! Try again.")
+            time.sleep(1)
     
     for i in tuplist:
         if ticlist[i[0]]==ticlist[i[1]]==ticlist[i[2]]!=" ":
