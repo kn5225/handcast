@@ -17,11 +17,11 @@ def get_hardware_choice(max_options, prompt_text):
     current_option = 1
     print(f"-> Current Selection: [{current_option}] (Wave hand to cycle, hold close to select)")
     
-    # Empty out any backlog before reading active gestures
     ser.reset_input_buffer()
     
     last_cycle_time = 0
-    CYCLE_COOLDOWN = 0.5  # Time in seconds between item selection jumps
+    CYCLE_COOLDOWN = 0.25  # --- SPEEDED UP: Fast, responsive menu scrolling
+    selection_counter = 0  # Tracks consecutive close readings to confirm intent
     
     while True:
         if ser.in_waiting > 0:
@@ -31,40 +31,51 @@ def get_hardware_choice(max_options, prompt_text):
                     distance = float(line.split(":")[1])
                     current_time = time.time()
                     
-                    # 1. SELECTION ZONE (Hand held tight to sensor)
+                    # 1. INTENT-BASED SELECTION ZONE
                     if 2.0 <= distance <= 12.0:
-                        print(f"\n[Confirmed] Selected Option: {current_option}\n")
+                        selection_counter += 1
                         
-                        # ANTI-DOUBLE-TRIGGER LOOP:
-                        # Stalls execution until you pull your hand out of the action zone
-                        print("Clear your hand away to continue...", end="\r")
-                        consecutive_clears = 0
-                        while consecutive_clears < 8:
-                            if ser.in_waiting > 0:
-                                clear_line = ser.readline().decode('utf-8').strip()
-                                if clear_line.startswith("DIST:"):
-                                    try:
-                                        clear_dist = float(clear_line.split(":")[1])
-                                        # If the sensor reads far away or out-of-range (>15), count it as a clear
-                                        if clear_dist > 15.0:
-                                            consecutive_clears += 1
-                                        else:
-                                            consecutive_clears = 0 # hand is still there, reset counter
-                                    except ValueError:
-                                        pass
-                            time.sleep(0.01)
+                        # Requires 3 consecutive close readings (~100ms hold time) before confirming
+                        if selection_counter >= 3:
+                            # Print spaces to completely wipe out the carriage return line buffer
+                            print("[Confirmed] Selected Option: {}                        ".format(current_option))
+                            print("\n")
+                            
+                            # ANTI-DOUBLE-TRIGGER LOOP
+                            print("Clear your hand away to continue...                     ", end="\r")
+                            consecutive_clears = 0
+                            while consecutive_clears < 8:
+                                if ser.in_waiting > 0:
+                                    clear_line = ser.readline().decode('utf-8').strip()
+                                    if clear_line.startswith("DIST:"):
+                                        try:
+                                            clear_dist = float(clear_line.split(":")[1])
+                                            if clear_dist > 15.0:
+                                                consecutive_clears += 1
+                                            else:
+                                                consecutive_clears = 0
+                                        except ValueError:
+                                            pass
+                                time.sleep(0.01)
+                            
+                            # Wipe the clearance message cleanly from the command line interface
+                            print("                                                        ", end="\r")
+                            ser.reset_input_buffer()
+                            return str(current_option)
                         
-                        # Clear old inputs built up during the stall and yield control back to PokeCLI
-                        ser.reset_input_buffer()
-                        return str(current_option)
-                        
-                    # 2. CYCLING ZONE (Hand held in mid-air sweet spot)
+                    # 2. SPEED CYCLING ZONE
                     elif 15.0 < distance <= 32.0:
+                        selection_counter = 0 # Broke the selection path, reset confirmation counter
                         if current_time - last_cycle_time > CYCLE_COOLDOWN:
                             current_option = (current_option % max_options) + 1
-                            print(f"-> Current Selection: [{current_option}]     ", end="\r")
+                            # Added padding spaces to ensure clean menu display overwrites
+                            print(f"-> Current Selection: [{current_option}]       ", end="\r")
                             last_cycle_time = current_time
-                            ser.reset_input_buffer() # flush buffer to ensure responsive tracking
+                            ser.reset_input_buffer()
+                            
+                    else:
+                        # Hand is completely out of bounds or out of range, reset tracking
+                        selection_counter = 0
                             
             except (ValueError, IndexError):
                 pass
