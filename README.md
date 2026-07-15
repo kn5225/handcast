@@ -2,6 +2,18 @@
 
 An extensible embedded input pipeline that translates physical distance metrics into real-time system-wide macros and native application controls using hardware-in-the-loop processing.
 
+> **Development Sprint:** July 10, 2026 (completed in a single 8-hour session)
+
+---
+
+## The 8-hour sprint challenge
+
+HandCast was designed, wired, programmed, and deployed in a single, continuous hack sprint on **July 10, 2026**. The goal was to evaluate how rapidly a fully integrated, low-latency physical-to-digital pipeline could be built from scratch.
+
+By executing the firmware, Python serialization logic, and Windows OS macro drivers as parallel subsystems, the entire ecosystem went from wires on a desk and basic pre-written Python games on a laptop to an optimized, functional interface before the day ended.
+
+---
+
 ## What it does
 
 HandCast reads continuous distance data from an ultrasonic sensor and processes it into a stable telemetry stream. The architecture supports two independent operational modes:
@@ -9,12 +21,16 @@ HandCast reads continuous distance data from an ultrasonic sensor and processes 
 1. **Global OS Mode** (`drivers/handcast_parser.ahk`) — Runs as a background Windows service via AutoHotkey. It intercepts the data stream to inject global virtual key codes (`{Space}` and `{Right}`) into the active window, enabling hands-free media playback control, document scrolling, or slide transitions.
 2. **Native Application Mode** (`drivers/hardware_input.py`) — An importable Python SDK module. It reads the serial interface directly to handle interactive menu cycling and threshold-based verification within custom software loops.
 
+---
+
 ## Technical highlights
 
 - **Sub-50ms pipeline** — Optimized loop execution paths keep end-to-end latency from physical gesture to OS macro dispatch below 50ms.
 - **Software-based filtering** — An on-board exponential moving average low-pass filter (α = 0.3) suppresses sensor jitter without extra hardware.
 - **Ecosystem architecture** — A modular monorepo keeps microcontroller firmware, OS-level drivers, and SDK integrations synchronized in one version-controlled repo.
 - **Buffered non-blocking I/O** — Native file/stream-handling on the host side polls incoming serial bytes without freezing runtime execution loops.
+
+---
 
 ## Tech stack
 
@@ -24,6 +40,8 @@ HandCast reads continuous distance data from an ultrasonic sensor and processes 
 | Hardware | ATmega328P (Arduino Uno), HC-SR04 Ultrasonic Sensor |
 | Drivers & Automation | AutoHotkey v2, Python 3 (PySerial) |
 | Protocol | UART over USB (115200 baud) |
+
+---
 
 ## Project structure
 
@@ -39,6 +57,8 @@ handcast/
 │   └── tictactoe.py          # Serial-integrated Tic-Tac-Toe game
 └── README.md                 # System documentation
 ```
+
+---
 
 ## Local setup
 
