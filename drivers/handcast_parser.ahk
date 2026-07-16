@@ -6,20 +6,25 @@ PortNum := "COM5"
 BaudRate := 115200
 
 hPort := DllCall("CreateFile", "Str", "\\.\" PortNum, "UInt", 0xC0000000, "UInt", 0, "Ptr", 0, "UInt", 3, "UInt", 0, "Ptr", 0, "Ptr")
-if (hPort = -1) {
-    MsgBox("Failed to open " PortNum)
+if (hPort = -1 || hPort = 0) {
+    MsgBox("Failed to open " PortNum "`nMake sure your Arduino Serial Monitor is closed.")
     ExitApp
 }
 
-DCB := Buffer(28, 0)
-NumPut("UInt", 28, DCB, 0)
-DllCall("GetCommState", "Ptr", hPort, "Ptr", DCB)
-NumPut("UInt", BaudRate, DCB, 4)
-NumPut("UInt", 1, DCB, 8)
-NumPut("UChar", 8, DCB, 18)
-NumPut("UChar", 0, DCB, 19)
-NumPut("UChar", 0, DCB, 20)
-DllCall("SetCommState", "Ptr", hPort, "Ptr", DCB)
+DCB := Buffer(100, 0)
+NumPut("UInt", 100, DCB, 0)
+
+if !DllCall("BuildCommDCB", "Str", PortNum ":baud=" BaudRate " parity=N data=8 stop=1", "Ptr", DCB) {
+    MsgBox("Failed to build COM settings.")
+    DllCall("CloseHandle", "Ptr", hPort)
+    ExitApp
+}
+
+if !DllCall("SetCommState", "Ptr", hPort, "Ptr", DCB) {
+    MsgBox("Failed to apply baud rate to " PortNum)
+    DllCall("CloseHandle", "Ptr", hPort)
+    ExitApp
+}
 
 COMMTIMEOUTS := Buffer(20, 0)
 NumPut("UInt", 0xFFFFFFFF, COMMTIMEOUTS, 0)
@@ -27,10 +32,14 @@ NumPut("UInt", 0, COMMTIMEOUTS, 4)
 NumPut("UInt", 0, COMMTIMEOUTS, 8)
 NumPut("UInt", 0, COMMTIMEOUTS, 12)
 NumPut("UInt", 0, COMMTIMEOUTS, 16)
-DllCall("SetCommTimeouts", "Ptr", hPort, "Ptr", COMMTIMEOUTS)
 
-ToolTip("COM5 direct connection active...")
-Sleep 1500
+if !DllCall("SetCommTimeouts", "Ptr", hPort, "Ptr", COMMTIMEOUTS) {
+    MsgBox("Failed to apply serial timeouts.")
+    DllCall("CloseHandle", "Ptr", hPort)
+    ExitApp
+}
+
+ToolTip("Listening on " PortNum "...")
 
 serialBuffer := ""
 ReadBuf := Buffer(1024, 0)
