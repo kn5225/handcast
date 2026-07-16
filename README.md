@@ -2,15 +2,15 @@
 
 An extensible embedded input pipeline that translates physical distance metrics into real-time system-wide macros and native application controls using hardware-in-the-loop processing.
 
-> **Development Sprint:** July 10, 2026 (completed in a single 8-hour session)
+> **Development Sprints:** July 10, 2026 (4 PM – 11 PM) and July 15/16, 2026 (9 PM – 1 AM)
 
 ---
 
-## The 8-hour sprint challenge
+## The sprint challenge
 
-HandCast was designed, wired, programmed, and deployed in a single, continuous hack sprint on **July 10, 2026**. The goal was to evaluate how rapidly a fully integrated, low-latency physical-to-digital pipeline could be built from scratch.
+HandCast was designed, wired, programmed, and deployed across two focused hack sprints. The first session on **July 10** established the core pipeline and the Python script with pyserial; the second session on **July 15** was focused on debugging the AHK script from the first session and completing overall testing of the project. The goal was to evaluate how rapidly a fully integrated, low-latency physical-to-digital pipeline could be built and iterated on in short, intensive bursts.
 
-By executing the firmware, Python serialization logic, and Windows OS macro drivers as parallel subsystems, the entire ecosystem went from wires on a desk and basic pre-written Python games on a laptop to an optimized, functional interface before the day ended.
+By executing the firmware, Python serialization logic, and Windows OS macro drivers as parallel subsystems, the entire ecosystem went from wires on a desk and basic pre-written Python games on a laptop to an optimized, functional interface across these two sessions.
 
 ---
 
@@ -99,8 +99,8 @@ Ensure AutoHotkey v2 is installed to run the global macro driver.
    ```ahk
    ComPort := "COM3"  ; Match your active Arduino COM port
    ```
-3. Double-click `handcast_parser.ahk`. It runs quietly in your Windows system tray.
-4. Bring any window into focus (e.g. YouTube or a PDF) and wave your hand over the sensor to trigger spacebar or right-arrow macros.
+3. Double-click `handcast_parser.ahk`. After you choose your macros, tt runs quietly in your Windows system tray.
+4. Bring any window into focus (e.g. YouTube or a PDF) and wave your hand over the sensor to trigger the default spacebar/right-arrow/down-arrow macros, or your chosen ones.
 
 ### 5. Running Native Application Mode
 
