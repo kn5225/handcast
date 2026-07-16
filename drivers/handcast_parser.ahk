@@ -14,14 +14,14 @@ try {
     ExitApp
 }
 
-ToolTip("COM5 Connected! Processing latest stream...")
-Sleep 1500
-
 lastSend := 0
 closeZoneStart := 0
 farZoneStart := 0
 settleTime := 150
 globalCooldown := 600
+
+closeZoneLatched := false
+farZoneLatched := false
 
 Loop {
     if (serialPort) {
@@ -36,37 +36,48 @@ Loop {
                 if RegExMatch(targetData, "DIST:([\d\.]+)", &match) {
                     try {
                         distance := Float(match[1])
-                        ToolTip("Real-time Distance: " distance " cm")
                         
                         currentTime := A_TickCount
                         
-                        if (currentTime - lastSend > globalCooldown) {
-                            if (distance > 5 && distance <= 15) {
-                                farZoneStart := 0
-                                
+                        if (distance > 5 && distance <= 15) {
+                            farZoneStart := 0
+                            farZoneLatched := false
+                            
+                            if (!closeZoneLatched) {
                                 if (closeZoneStart = 0) {
                                     closeZoneStart := currentTime
                                 } else if (currentTime - closeZoneStart > settleTime) {
-                                    Send "{Space}" 
-                                    lastSend := currentTime
-                                    closeZoneStart := 0
+                                    if (currentTime - lastSend > globalCooldown) {
+                                        Send "{Space}" 
+                                        lastSend := currentTime
+                                        closeZoneLatched := true
+                                        closeZoneStart := 0
+                                    }
                                 }
                             }
-                            else if (distance > 15 && distance <= 30) {
-                                closeZoneStart := 0
-                                
+                        }
+                        else if (distance > 15 && distance <= 30) {
+                            closeZoneStart := 0
+                            closeZoneLatched := false
+                            
+                            if (!farZoneLatched) {
                                 if (farZoneStart = 0) {
                                     farZoneStart := currentTime
                                 } else if (currentTime - farZoneStart > settleTime) {
-                                    Send "{Right}"
-                                    lastSend := currentTime
-                                    farZoneStart := 0
+                                    if (currentTime - lastSend > globalCooldown) {
+                                        Send "{Right}"
+                                        lastSend := currentTime
+                                        farZoneLatched := true
+                                        farZoneStart := 0
+                                    }
                                 }
                             }
-                            else {
-                                closeZoneStart := 0
-                                farZoneStart := 0
-                            }
+                        }
+                        else {
+                            closeZoneStart := 0
+                            farZoneStart := 0
+                            closeZoneLatched := false
+                            farZoneLatched := false
                         }
                     }
                 }
