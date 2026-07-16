@@ -17,14 +17,14 @@ try {
 ToolTip("COM5 Active! Move your hand to test...")
 Sleep 1500
 
-buffer := ""
+serialBuffer := ""
 
 Loop {
     if (serialPort) {
         if (newData := serialPort.Read(100)) {
-            buffer .= newData
+            serialBuffer .= newData
             
-            if RegExMatch(buffer, "DIST:([\d\.]+)\r?\n", &match) {
+            if RegExMatch(serialBuffer, "DIST:([\d\.]+)\r?\n", &match) {
                 try {
                     distance := Float(match[1])
                     ToolTip("Distance: " distance " cm")
@@ -39,11 +39,11 @@ Loop {
                     }
                 }
                 
-                buffer := "" 
+                serialBuffer := "" 
             }
             
-            if (StrLen(buffer) > 500) {
-                buffer := ""
+            if (StrLen(serialBuffer) > 500) {
+                serialBuffer := ""
             }
         }
     }
