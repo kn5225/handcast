@@ -39,6 +39,12 @@ if !DllCall("SetCommTimeouts", "Ptr", hPort, "Ptr", COMMTIMEOUTS) {
     ExitApp
 }
 
+; Force DTR and RTS high (this tells the Arduino Uno reset circuit to let the MCU boot)
+DllCall("EscapeCommFunction", "Ptr", hPort, "UInt", 5) ; SETDTR
+DllCall("EscapeCommFunction", "Ptr", hPort, "UInt", 3) ; SETRTS
+
+ToolTip("Waiting for Arduino bootloader (2 seconds)...")
+Sleep 2000
 ToolTip("Listening on " PortNum "...")
 
 serialBuffer := ""
