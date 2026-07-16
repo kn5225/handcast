@@ -14,35 +14,36 @@ try {
     ExitApp
 }
 
-ToolTip("COM5 Connected!")
+ToolTip("COM5 Connected! Processing latest stream...")
 Sleep 1500
-
-serialBuffer := ""
 
 Loop {
     if (serialPort) {
-        line := serialPort.ReadLine()
+        rawStream := serialPort.Read(2048)
         
-        if InStr(line, "DIST:") {
-            rawVal := StrReplace(line, "DIST:")
-            cleanVal := StrReplace(StrReplace(rawVal, "`r", ""), "`n", "")
+        if (rawStream != "") {
+            lastIndex := InStr(rawStream, "DIST:", , -1)
             
-            try {
-                distance := Float(cleanVal)
-                ToolTip("Parsed Distance: " distance " cm")
+            if (lastIndex) {
+                targetData := SubStr(rawStream, lastIndex)
                 
-                if (distance > 5 && distance <= 15) {
-                    Send "{Space}" 
-                    Sleep 200
-                }
-                else if (distance > 15 && distance <= 30) {
-                    Send "{Right}"
-                    Sleep 200
+                if RegExMatch(targetData, "DIST:([\d\.]+)", &match) {
+                    try {
+                        distance := Float(match[1])
+                        ToolTip("Real-time Distance: " distance " cm")
+                        
+                        if (distance > 5 && distance <= 15) {
+                            Send "{Space}" 
+                            Sleep 200
+                        }
+                        else if (distance > 15 && distance <= 30) {
+                            Send "{Right}"
+                            Sleep 200
+                        }
+                    }
                 }
             }
-            
-            line := "" 
         }
     }
-    Sleep 10
+    Sleep 30
 }
