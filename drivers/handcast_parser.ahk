@@ -17,9 +17,11 @@ try {
 ToolTip("COM5 Connected! Processing latest stream...")
 Sleep 1500
 
+lastSend := 0
+
 Loop {
     if (serialPort) {
-        rawStream := serialPort.Read(2048)
+        rawStream := serialPort.Read(4096)
         
         if (rawStream != "") {
             lastIndex := InStr(rawStream, "DIST:", , -1)
@@ -32,18 +34,20 @@ Loop {
                         distance := Float(match[1])
                         ToolTip("Real-time Distance: " distance " cm")
                         
-                        if (distance > 5 && distance <= 15) {
-                            Send "{Space}" 
-                            Sleep 200
-                        }
-                        else if (distance > 15 && distance <= 30) {
-                            Send "{Right}"
-                            Sleep 200
+                        if (A_TickCount - lastSend > 200) {
+                            if (distance > 5 && distance <= 15) {
+                                Send "{Space}" 
+                                lastSend := A_TickCount
+                            }
+                            else if (distance > 15 && distance <= 30) {
+                                Send "{Right}"
+                                lastSend := A_TickCount
+                            }
                         }
                     }
                 }
             }
         }
     }
-    Sleep 30
+    Sleep 10
 }
