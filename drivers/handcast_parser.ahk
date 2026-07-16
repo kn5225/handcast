@@ -18,6 +18,10 @@ ToolTip("COM5 Connected! Processing latest stream...")
 Sleep 1500
 
 lastSend := 0
+closeZoneStart := 0
+farZoneStart := 0
+settleTime := 150
+globalCooldown := 600
 
 Loop {
     if (serialPort) {
@@ -34,14 +38,34 @@ Loop {
                         distance := Float(match[1])
                         ToolTip("Real-time Distance: " distance " cm")
                         
-                        if (A_TickCount - lastSend > 200) {
+                        currentTime := A_TickCount
+                        
+                        if (currentTime - lastSend > globalCooldown) {
                             if (distance > 5 && distance <= 15) {
-                                Send "{Space}" 
-                                lastSend := A_TickCount
+                                farZoneStart := 0
+                                
+                                if (closeZoneStart = 0) {
+                                    closeZoneStart := currentTime
+                                } else if (currentTime - closeZoneStart > settleTime) {
+                                    Send "{Space}" 
+                                    lastSend := currentTime
+                                    closeZoneStart := 0
+                                }
                             }
                             else if (distance > 15 && distance <= 30) {
-                                Send "{Right}"
-                                lastSend := A_TickCount
+                                closeZoneStart := 0
+                                
+                                if (farZoneStart = 0) {
+                                    farZoneStart := currentTime
+                                } else if (currentTime - farZoneStart > settleTime) {
+                                    Send "{Right}"
+                                    lastSend := currentTime
+                                    farZoneStart := 0
+                                }
+                            }
+                            else {
+                                closeZoneStart := 0
+                                farZoneStart := 0
                             }
                         }
                     }
