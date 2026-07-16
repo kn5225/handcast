@@ -9,11 +9,9 @@ farKey   := "{Down}"
 ib1 := InputBox("Enter key for Close Zone (5-20 cm):", "Macro Config", "w300 h130", closeKey)
 if (ib1.Result = "OK" && ib1.Value != "")
     closeKey := ib1.Value
-
 ib2 := InputBox("Enter key for Mid Zone (25-40 cm):", "Macro Config", "w300 h130", midKey)
 if (ib2.Result = "OK" && ib2.Value != "")
     midKey := ib2.Value
-
 ib3 := InputBox("Enter key for Far Zone (45-60 cm):", "Macro Config", "w300 h130", farKey)
 if (ib3.Result = "OK" && ib3.Value != "")
     farKey := ib3.Value
@@ -27,27 +25,41 @@ try {
     ExitApp
 }
 
+hFile := serialPort.Handle
+timeouts := Buffer(20, 0)
+NumPut("UInt", 0xFFFFFFFF, timeouts, 0)
+NumPut("UInt", 0, timeouts, 4)
+NumPut("UInt", 0, timeouts, 8)
+DllCall("SetCommTimeouts", "ptr", hFile, "ptr", timeouts)
+
 closeStart := midStart := farStart := 0
 closeLatched := midLatched := farLatched := false
 settleTime := 150
 
+readings := []
+readingCount := 5
+
 Loop {
-    rawStream := ""
-    while (serialPort.Length > 0) {
-        rawStream := serialPort.Read(4096)
-    }
-    
-    if (rawStream != "") {
+    rawStream := serialPort.Read(1024)
+
+    if (StrLen(rawStream) > 0) {
         lastIndex := InStr(rawStream, "DIST:", , -1)
-        
+
         if (lastIndex && RegExMatch(SubStr(rawStream, lastIndex), "DIST:([\d\.]+)", &match)) {
             try {
-                distance := Float(match[1])
-                now := A_TickCount
+                rawDistance := Float(match[1])
+                readings.Push(rawDistance)
+                if (readings.Length > readingCount)
+                    readings.RemoveAt(1)
 
+                sum := 0
+                for r in readings
+                    sum += r
+                distance := sum / readings.Length
+
+                now := A_TickCount
                 if (distance > 5 && distance <= 20) {
                     midStart := farStart := 0
-                    
                     if (closeStart = 0) {
                         closeStart := now
                     } else if (now - closeStart > settleTime) {
@@ -60,7 +72,6 @@ Loop {
                 }
                 else if (distance > 25 && distance <= 40) {
                     closeStart := farStart := 0
-
                     if (midStart = 0) {
                         midStart := now
                     } else if (now - midStart > settleTime) {
@@ -73,7 +84,6 @@ Loop {
                 }
                 else if (distance > 45 && distance <= 60) {
                     closeStart := midStart := 0
-
                     if (farStart = 0) {
                         farStart := now
                     } else if (now - farStart > settleTime) {
