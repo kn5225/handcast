@@ -1,7 +1,7 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-ComPort := "COM3" 
+ComPort := "COM5" 
 BaudRate := 115200
 
 try {
