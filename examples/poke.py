@@ -69,8 +69,10 @@ while (t<20 and Pokemon2.HP>0) or (t<10 and Pokemon1.HP>0):
                 d1=10+(5*move)
                 if Pokemon2.HP>=d1:
                     Pokemon2.change_hp(-d1)
+                    print(f"You did {d1} damage!!")
                 else:
                     Pokemon2.HP=0
+                    print(f"You did {Pokemon2.HP} damage!!")
         elif event=="2":
             item = get_hardware_choice(2, "Which item would you like to use? \n 1: Potion \n 2: Full Restore")
             if item=="1":
