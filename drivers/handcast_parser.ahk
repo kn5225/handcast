@@ -23,7 +23,7 @@ RunWait(A_ComSpec ' /c mode COM5: baud=115200 parity=n data=8 stop=1 dtr=off', ,
 try {
     serialPort := FileOpen("\\.\COM5", "r-d", "UTF-8")
 } catch OSError {
-    MsgBox("Failed to connect to COM5.")
+    MsgBox("Failed to connect to COM5. Make sure your serial monitor is closed!")
     ExitApp
 }
 
@@ -32,59 +32,57 @@ closeLatched := midLatched := farLatched := false
 settleTime := 150
 
 Loop {
-    if !(rawStream := serialPort.Read(4096)) {
-        Sleep 10
-        continue
-    }
+    if (serialPort.Length > 0) {
+        line := serialPort.ReadLine()
+        
+        if RegExMatch(line, "DIST:([\d\.]+)", &match) {
+            try {
+                distance := Float(match[1])
+                now := A_TickCount
 
-    lastIndex := InStr(rawStream, "DIST:", , -1)
-    if (lastIndex && RegExMatch(SubStr(rawStream, lastIndex), "DIST:([\d\.]+)", &match)) {
-        try {
-            distance := Float(match[1])
-            now := A_TickCount
-
-            if (distance > 5 && distance <= 20) {
-                midStart := farStart := 0
-                
-                if (closeStart = 0) {
-                    closeStart := now
-                } else if (now - closeStart > settleTime) {
-                    midLatched := farLatched := false
-                    if (!closeLatched) {
-                        Send closeKey
-                        closeLatched := true
+                if (distance > 5 && distance <= 20) {
+                    midStart := farStart := 0
+                    
+                    if (closeStart = 0) {
+                        closeStart := now
+                    } else if (now - closeStart > settleTime) {
+                        midLatched := farLatched := false
+                        if (!closeLatched) {
+                            Send closeKey
+                            closeLatched := true
+                        }
                     }
                 }
-            }
-            else if (distance > 25 && distance <= 40) {
-                closeStart := farStart := 0
+                else if (distance > 25 && distance <= 40) {
+                    closeStart := farStart := 0
 
-                if (midStart = 0) {
-                    midStart := now
-                } else if (now - midStart > settleTime) {
-                    closeLatched := farLatched := false
-                    if (!midLatched) {
-                        Send midKey
-                        midLatched := true
+                    if (midStart = 0) {
+                        midStart := now
+                    } else if (now - midStart > settleTime) {
+                        closeLatched := farLatched := false
+                        if (!midLatched) {
+                            Send midKey
+                            midLatched := true
+                        }
                     }
                 }
-            }
-            else if (distance > 45 && distance <= 60) {
-                closeStart := midStart := 0
+                else if (distance > 45 && distance <= 60) {
+                    closeStart := midStart := 0
 
-                if (farStart = 0) {
-                    farStart := now
-                } else if (now - farStart > settleTime) {
-                    closeLatched := midLatched := false
-                    if (!farLatched) {
-                        Send farKey
-                        farLatched := true
+                    if (farStart = 0) {
+                        farStart := now
+                    } else if (now - farStart > settleTime) {
+                        closeLatched := midLatched := false
+                        if (!farLatched) {
+                            Send farKey
+                            farLatched := true
+                        }
                     }
                 }
-            }
-            else {
-                closeStart := midStart := farStart := 0
-                closeLatched := midLatched := farLatched := false
+                else {
+                    closeStart := midStart := farStart := 0
+                    closeLatched := midLatched := farLatched := false
+                }
             }
         }
     }
