@@ -5,9 +5,12 @@ Esc:: ExitApp
 ComPort := "COM5" 
 BaudRate := 115200
 
+RunWait(A_ComSpec ' /c mode ' ComPort ': baud=' BaudRate ' parity=n data=8 stop=1 dtr=off', , "Hide")
+
 try {
-    serialPort := FileOpen(ComPort, "r", "UTF-8")
-} catch {
+    serialPort := FileOpen(ComPort, "r-d", "UTF-8")
+} catch OSError as err {
+    MsgBox("Failed to open " ComPort "`nError: " err.Message)
     ExitApp
 }
 
@@ -16,15 +19,19 @@ Loop {
         line := serialPort.ReadLine()
         if InStr(line, "DIST:") {
             rawVal := StrReplace(line, "DIST:")
-            distance := Float(StrReplace(rawVal, "`n", ""))
+            cleanVal := RegExReplace(rawVal, "[\r\n]") 
             
-            if (distance > 5 && distance <= 15) {
-                Send "{Space}" 
-                Sleep 200
-            }
-            else if (distance > 15 && distance <= 30) {
-                Send "{Right}"
-                Sleep 200
+            try {
+                distance := Float(cleanVal)
+                
+                if (distance > 5 && distance <= 15) {
+                    Send "{Space}" 
+                    Sleep 200
+                }
+                else if (distance > 15 && distance <= 30) {
+                    Send "{Right}"
+                    Sleep 200
+                }
             }
         }
     }
