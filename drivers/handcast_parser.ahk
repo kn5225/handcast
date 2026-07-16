@@ -14,16 +14,22 @@ try {
     ExitApp
 }
 
+ToolTip("COM5 Connected!")
+Sleep 1500
+
+serialBuffer := ""
+
 Loop {
     if (serialPort) {
         line := serialPort.ReadLine()
+        
         if InStr(line, "DIST:") {
             rawVal := StrReplace(line, "DIST:")
-            
             cleanVal := StrReplace(StrReplace(rawVal, "`r", ""), "`n", "")
             
             try {
                 distance := Float(cleanVal)
+                ToolTip("Parsed Distance: " distance " cm")
                 
                 if (distance > 5 && distance <= 15) {
                     Send "{Space}" 
@@ -34,6 +40,8 @@ Loop {
                     Sleep 200
                 }
             }
+            
+            line := "" 
         }
     }
     Sleep 10
