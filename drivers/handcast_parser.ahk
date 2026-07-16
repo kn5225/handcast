@@ -32,10 +32,15 @@ closeLatched := midLatched := farLatched := false
 settleTime := 150
 
 Loop {
-    if (serialPort.Length > 0) {
-        line := serialPort.ReadLine()
+    rawStream := ""
+    while (serialPort.Length > 0) {
+        rawStream := serialPort.Read(4096)
+    }
+    
+    if (rawStream != "") {
+        lastIndex := InStr(rawStream, "DIST:", , -1)
         
-        if RegExMatch(line, "DIST:([\d\.]+)", &match) {
+        if (lastIndex && RegExMatch(SubStr(rawStream, lastIndex), "DIST:([\d\.]+)", &match)) {
             try {
                 distance := Float(match[1])
                 now := A_TickCount
