@@ -45,43 +45,40 @@ Loop {
 
             if (distance > 5 && distance <= 20) {
                 midStart := farStart := 0
-                midLatched := farLatched := false
-
-                if (!closeLatched) {
-                    if (closeStart = 0) {
-                        closeStart := now
-                    } else if (now - closeStart > settleTime) {
+                
+                if (closeStart = 0) {
+                    closeStart := now
+                } else if (now - closeStart > settleTime) {
+                    midLatched := farLatched := false
+                    if (!closeLatched) {
                         Send closeKey
                         closeLatched := true
-                        closeStart := 0
                     }
                 }
             }
             else if (distance > 25 && distance <= 40) {
                 closeStart := farStart := 0
-                closeLatched := farLatched := false
 
-                if (!midLatched) {
-                    if (midStart = 0) {
-                        midStart := now
-                    } else if (now - midStart > settleTime) {
+                if (midStart = 0) {
+                    midStart := now
+                } else if (now - midStart > settleTime) {
+                    closeLatched := farLatched := false
+                    if (!midLatched) {
                         Send midKey
                         midLatched := true
-                        midStart := 0
                     }
                 }
             }
             else if (distance > 45 && distance <= 60) {
                 closeStart := midStart := 0
-                closeLatched := midLatched := false
 
-                if (!farLatched) {
-                    if (farStart = 0) {
-                        farStart := now
-                    } else if (now - farStart > settleTime) {
+                if (farStart = 0) {
+                    farStart := now
+                } else if (now - farStart > settleTime) {
+                    closeLatched := midLatched := false
+                    if (!farLatched) {
                         Send farKey
                         farLatched := true
-                        farStart := 0
                     }
                 }
             }
