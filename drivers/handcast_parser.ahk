@@ -1,5 +1,6 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
+Esc:: ExitApp
 
 ComPort := "COM5" 
 BaudRate := 115200
