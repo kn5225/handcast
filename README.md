@@ -99,7 +99,7 @@ Ensure AutoHotkey v2 is installed to run the global macro driver.
    ```ahk
    ComPort := "COM3"  ; Match your active Arduino COM port
    ```
-3. Double-click `handcast_parser.ahk`. After you choose your macros, tt runs quietly in your Windows system tray.
+3. Double-click `handcast_parser.ahk`. After you choose your macros, it runs quietly in your Windows system tray.
 4. Bring any window into focus (e.g. YouTube or a PDF) and wave your hand over the sensor to trigger the default spacebar/right-arrow/down-arrow macros, or your chosen ones.
 
 ### 5. Running Native Application Mode
